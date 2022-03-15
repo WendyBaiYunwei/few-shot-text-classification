@@ -144,24 +144,30 @@ def idx_all_data(data, vocabulary):
     return data
 
 def get_sorted_adj(domains, processed_data):
-    model = SentenceTransformer('bert-base-nli-mean-tokens')
+    model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
     train_data = get_train_data(data_path, domains)
     sorted_adjs = {}
+    fi = 0
     for filename in train_data:
+        print(fi, len(train_data))
+        fi += 1
         one_type = {}
         for type in ['pos', 'neg']:
             one_type_file = train_data[filename][type]['data']
             adj = defaultdict(list)
             print('total i:', len(one_type_file))
             for i in range(len(one_type_file)):
-                print(i)
                 data1 = one_type_file[i]
                 data1 = ' '.join(data1)
                 data1 = model.encode(data1)
                 processed1 = processed_data[filename][type]['data'][i]
                 key = str(processed1)
-                for j in range(len(one_type_file)):
-                    data2 = one_type_file[j]
+                if len(one_type_file) >= 30:
+                    one_type_file_subset = random.sample(one_type_file, k = 30)
+                else:
+                    one_type_file_subset = one_type_file 
+                for j in range(len(one_type_file_subset)):
+                    data2 = one_type_file_subset[j]
                     data2 = ' '.join(data2)
                     data2 = model.encode(data2)
                     sim = 1 - distance.cosine(data1, data2) # measure similarity between two sentences

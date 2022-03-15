@@ -61,35 +61,36 @@ class OrderedTrainDataLoader:
 
     def get_filename(self):
         self.index = (self.index + 1) % len(self)
-        return self.filenames[self.index]
-
-    # def unpack_str(self, query):
-    #     tokens = query.split(', ')
-    #     print(tokens)
-    #     # start and end, to-do
-    #     tokens = [int(token) for token in tokens]
-    #     return torch.stack(tokens)        
+        return self.filenames[self.index]  
 
     def get_query_by_ss(self, support, type, difficulty_level, filename):
         # 510 map to same class other neighbours of size 510
         # assume 1 support
-        cur_neighbors = self.sorted_adj[filename][type][support][difficulty_level:] # from similar to different
-        query_len = min(len(cur_neighbors), self.query) # check and take out query overlaps to-do
+       
+        all_nbs = self.sorted_adj[filename][type][support]
+        print(all_nbs)
+        if difficulty_level < len(all_nbs):
+            cur_neighbors = all_nbs[difficulty_level:] # from similar to different
+        else:
+            cur_neighbors = all_nbs
+        query_len = min(len(cur_neighbors), self.query)
         queries = cur_neighbors[:query_len]
         queries = [query[1:] for query in queries]
         return torch.stack(queries)
 
     def combine_batch(self, neg_data, neg_target, pos_data, pos_target, difficulty_level, filename):
+        if difficulty_level < 1:
+            difficulty_level = 1 # minimum difficulty leve is 1
         neg_data, pos_data = padding(neg_data, pos_data, pad_idx=self.pad_idx)
         # combine support data and query data
         support_data = torch.cat([neg_data[0:self.support], pos_data[0:self.support]], dim=0)
 
-        print('neg_data', neg_data, self.support)
+        # print('neg_data', neg_data, self.support)
         # neg_query = self.get_query_by_ss(neg_data[0:self.support], 'neg', difficulty_level, filename)
         pos_query = self.get_query_by_ss(pos_data[0:self.support], 'pos', difficulty_level, filename)
         # query_data = torch.cat([neg_query, pos_query], dim=0)
-        # print(query_data.shape)
-        # data = torch.cat([support_data, query_data], dim=0)
+        print(pos_query.shape)
+        data = torch.cat([support_data, query_data], dim=0)
         exit()
         # combine support target and query target
         support_target = torch.cat([neg_target[0:self.support], pos_target[0:self.support]], dim=0)
@@ -106,9 +107,10 @@ class OrderedTrainDataLoader:
 
         self.indices[filename]['neg'] += 1
         self.indices[filename]['pos'] += 1
-        # imcomplete batch
-        if min(len(neg_data), len(pos_data)) < self.support + self.query: #to-do: check
+        # incomplete batch
+        if min(len(neg_data), len(pos_data)) < self.support + self.query: 
             return self.get_batch()
         data, target = self.combine_batch(neg_data, neg_target, pos_data, pos_target, difficulty_level, filename)
         return data, target
 
+#to-do: build the contrast loader
