@@ -90,7 +90,7 @@ def main():
     interval = 2000 #to-do, config
     mean_i = 0
     max_diff = 10
-    diff_choices = [i for i in range(0, max_diff, 1)]
+    diff_choices = [i for i in range(0, 30, 1)] # choose uniformly at random
     diff_mean = diff_choices[mean_i]
     filtere_diffs = [diff_mean for _ in range(interval)]
     diff_i = 0
