@@ -64,34 +64,38 @@ class OrderedTrainDataLoader:
         return self.filenames[self.index]  
 
     def get_query_by_ss(self, support, type, difficulty_level, filename):
-        # 510 map to same class other neighbours of size 510
-        # assume 1 support
-       
-        all_nbs = self.sorted_adj[filename][type][support]
-        print(all_nbs)
+        # assume size-1 support
+        support = str(support)
+        support_tokens = support.replace(' ', '').replace('\n', '').split(',')
+        support_len = len(support_tokens)
+        remaining = []
+        for token in support_tokens:
+            if token != '0':
+                remaining.append(token)
+            else:
+                break
+        list_str = ', '.join(remaining)
+        list_str = list_str[len('tensor(['):] + ']'
+        all_nbs = self.sorted_adj[filename][type][list_str]
         if difficulty_level < len(all_nbs):
-            cur_neighbors = all_nbs[difficulty_level:] # from similar to different
+            queries = all_nbs[difficulty_level] # from similar to different
         else:
-            cur_neighbors = all_nbs
-        query_len = min(len(cur_neighbors), self.query)
-        queries = cur_neighbors[:query_len]
-        queries = [query[1:] for query in queries]
-        return torch.stack(queries)
+            queries = all_nbs[-1]
+        front = torch.LongTensor(queries[1:])
+        padding = torch.zeros(support_len - len(queries) + 1, dtype=torch.long)
+        queries = torch.cat([front, padding]).reshape(1, -1)
+        return queries
 
     def combine_batch(self, neg_data, neg_target, pos_data, pos_target, difficulty_level, filename):
-        if difficulty_level < 1:
-            difficulty_level = 1 # minimum difficulty leve is 1
         neg_data, pos_data = padding(neg_data, pos_data, pad_idx=self.pad_idx)
         # combine support data and query data
         support_data = torch.cat([neg_data[0:self.support], pos_data[0:self.support]], dim=0)
 
         # print('neg_data', neg_data, self.support)
-        # neg_query = self.get_query_by_ss(neg_data[0:self.support], 'neg', difficulty_level, filename)
+        neg_query = self.get_query_by_ss(neg_data[0:self.support], 'neg', difficulty_level, filename)
         pos_query = self.get_query_by_ss(pos_data[0:self.support], 'pos', difficulty_level, filename)
-        # query_data = torch.cat([neg_query, pos_query], dim=0)
-        print(pos_query.shape)
+        query_data = torch.cat([neg_query, pos_query], dim=0)
         data = torch.cat([support_data, query_data], dim=0)
-        exit()
         # combine support target and query target
         support_target = torch.cat([neg_target[0:self.support], pos_target[0:self.support]], dim=0)
         query_target = torch.cat([neg_target[self.support:], pos_target[self.support:]], dim=0)

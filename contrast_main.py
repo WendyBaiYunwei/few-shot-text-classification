@@ -66,36 +66,31 @@ def get_filtered_diffs(mean, interval):
     filtered_diffs = []
 
     while len(filtered_diffs) < interval:
-        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))#to-do
+        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 2.5))
         # oldMin = np.amin(diffs)
-        new_diffs = list(filter(lambda x : (x <= mean and x >= 0), diffs))
-        # new_diffs = list(map(lambda x : int((x - oldMin)/(mean - oldMin) * 598), new_diffs))
-        filtered_diffs.extend(new_diffs[:interval])
+        newDiffs = list(filter(lambda x : (x <= mean and x >= 1), diffs))
+        # newDiffs = list(map(lambda x : int((x - oldMin)/(mean - oldMin) * 598), newDiffs))
+        filtered_diffs.extend(newDiffs[:interval])
 
     # filtered_diffs = [mean for i in range(INTERVAL)]
     return filtered_diffs
 
 def main():
-    torch.set_printoptions(profile="full")
     best_episode, best_acc = 0, 0.
-    # early_stop = int(config['model']['early_stop']) * dev_interval
+    episodes = int(config['model']['episodes'])
+    early_stop = int(config['model']['early_stop']) * dev_interval
     
-    interval = 1000 #to-do, config
+    interval = 1000 #to-do, config, test variance
     mean_i = 0
-    max_diff = 30
-    diff_choices = [i for i in range(0, max_diff, 1)]
+    diff_choices = [i for i in range(0, 30, 1)]
     diff_mean = diff_choices[mean_i]
-    filtere_diffs = [diff_mean for _ in range(interval)]
+    filtere_diffs = [diff_mean for i in range(interval)]
     diff_i = 0
-    episodes = interval * max_diff - 1
     for episode in range(1, episodes + 1):
-        if episode % interval == 0:
-            mean_i += 1
-            diff_mean = diff_choices[mean_i]
+        if episode % interval == 1000:
             filtere_diffs = get_filtered_diffs(diff_mean, interval)
-            print('difficulty increases to: ', diff_mean)
-            diff_i = 0
-            
+            diff_mean = diff_choices[mean_i + 1]
+            mean_i += 1
         difficulty_level = filtere_diffs[diff_i]
         diff_i += 1
         train(episode, int(difficulty_level))
@@ -105,9 +100,9 @@ def main():
                 print('Better acc! Saving model!')
                 torch.save(model.state_dict(), config['model']['model_path'])
                 best_episode, best_acc = episode, acc
-            # if episode - best_episode >= early_stop:
-            #     print('Early stop at episode', episode)
-            #     break
+            if episode - best_episode >= early_stop:
+                print('Early stop at episode', episode)
+                break
 
     print('Reload the best model on episode', best_episode, 'with best acc', best_acc.item())
     ckpt = torch.load(config['model']['model_path'])
