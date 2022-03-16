@@ -87,9 +87,9 @@ def main():
     best_episode, best_acc = 0, 0.
     # early_stop = int(config['model']['early_stop']) * dev_interval
     
-    interval = 1000 #to-do, config
+    interval = 2000 #to-do, config
     mean_i = 0
-    max_diff = 30
+    max_diff = 10
     diff_choices = [i for i in range(0, max_diff, 1)]
     diff_mean = diff_choices[mean_i]
     filtere_diffs = [diff_mean for _ in range(interval)]
@@ -123,7 +123,7 @@ def main():
 
 
 if __name__ == "__main__":
-    EXPERIMENT_NAME = 'seq_nlp'#to-do
+    EXPERIMENT_NAME = '3-16_seq_nlp'#to-do
     logging.basicConfig(filename=EXPERIMENT_NAME + '.txt', level=logging.INFO)
     # config
     config = configparser.ConfigParser()

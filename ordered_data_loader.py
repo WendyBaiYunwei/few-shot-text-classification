@@ -117,7 +117,7 @@ class OrderedTrainDataLoader:
         self.indices[filename]['pos'] += 1
         # incomplete batch
         if min(len(neg_data), len(pos_data)) < self.support + self.query: 
-            return self.get_batch()
+            return self.get_batch(difficulty_level)
         data, target = self.combine_batch(neg_data, neg_target, pos_data, pos_target, difficulty_level, filename)
         if data == None:
             return self.get_batch(difficulty_level)
