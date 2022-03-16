@@ -8,6 +8,7 @@ import numpy as np
 from model import FewShotInduction
 from criterion import Criterion
 from tensorboardX import SummaryWriter
+import logging
 
 
 def train(episode, difficulty):
@@ -24,7 +25,9 @@ def train(episode, difficulty):
     writer.add_scalar('train_loss', loss.item(), episode)
     writer.add_scalar('train_acc', acc, episode)
     if episode % log_interval == 0:
-        print('Train Episode: {} Loss: {} Acc: {}'.format(episode, loss.item(), acc))
+        inf = 'Train Episode: {} Loss: {} Acc: {}'.format(episode, loss.item(), acc)
+        print(inf)
+        logging.info(inf)
 
 
 def dev(episode):
@@ -41,7 +44,9 @@ def dev(episode):
         count += amount
     acc = correct / count
     writer.add_scalar('dev_acc', acc, episode)
-    print('Dev Episode: {} Acc: {}'.format(episode, acc))
+    inf = 'Dev Episode: {} Acc: {}'.format(episode, acc)
+    print(inf)
+    logging.info(inf)
     return acc
 
 
@@ -59,7 +64,9 @@ def test():
         count += amount
     acc = correct / count
     writer.add_scalar('test_acc', acc)
-    print('Test Acc: {}'.format(acc))
+    inf = 'Test Acc: {}'.format(acc)
+    print(inf)
+    logging.info(inf)
     return acc
 
 def get_filtered_diffs(mean, interval):
@@ -116,6 +123,8 @@ def main():
 
 
 if __name__ == "__main__":
+    EXPERIMENT_NAME = 'seq_nlp'#to-do
+    logging.basicConfig(filename=EXPERIMENT_NAME + '.txt', level=logging.INFO)
     # config
     config = configparser.ConfigParser()
     config.read("config.ini")

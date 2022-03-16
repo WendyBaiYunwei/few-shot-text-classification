@@ -8,6 +8,7 @@ import numpy as np
 from model import FewShotInduction
 from criterion import Criterion
 from tensorboardX import SummaryWriter
+import logging
 
 
 def train(episode, difficulty):
@@ -24,7 +25,9 @@ def train(episode, difficulty):
     writer.add_scalar('train_loss', loss.item(), episode)
     writer.add_scalar('train_acc', acc, episode)
     if episode % log_interval == 0:
-        print('Train Episode: {} Loss: {} Acc: {}'.format(episode, loss.item(), acc))
+        inf = 'Train Episode: {} Loss: {} Acc: {}'.format(episode, loss.item(), acc)
+        print(inf)
+        logging.info(inf)
 
 
 def dev(episode):
@@ -41,7 +44,9 @@ def dev(episode):
         count += amount
     acc = correct / count
     writer.add_scalar('dev_acc', acc, episode)
-    print('Dev Episode: {} Acc: {}'.format(episode, acc))
+    inf = 'Dev Episode: {} Acc: {}'.format(episode, acc)
+    print(inf)
+    logging.info(inf)
     return acc
 
 
@@ -59,39 +64,46 @@ def test():
         count += amount
     acc = correct / count
     writer.add_scalar('test_acc', acc)
-    print('Test Acc: {}'.format(acc))
+    inf = 'Test Acc: {}'.format(acc)
+    print(inf)
+    logging.info(inf)
     return acc
 
 def get_filtered_diffs(mean, interval):
     filtered_diffs = []
 
     while len(filtered_diffs) < interval:
-        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 2.5))
+        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))#to-do
         # oldMin = np.amin(diffs)
-        newDiffs = list(filter(lambda x : (x <= mean and x >= 1), diffs))
-        # newDiffs = list(map(lambda x : int((x - oldMin)/(mean - oldMin) * 598), newDiffs))
-        filtered_diffs.extend(newDiffs[:interval])
+        new_diffs = list(filter(lambda x : (x <= mean and x >= 0), diffs))
+        # new_diffs = list(map(lambda x : int((x - oldMin)/(mean - oldMin) * 598), new_diffs))
+        filtered_diffs.extend(new_diffs[:interval])
 
     # filtered_diffs = [mean for i in range(INTERVAL)]
     return filtered_diffs
 
 def main():
+    torch.set_printoptions(profile="full")
     best_episode, best_acc = 0, 0.
-    episodes = int(config['model']['episodes'])
-    early_stop = int(config['model']['early_stop']) * dev_interval
+    # early_stop = int(config['model']['early_stop']) * dev_interval
     
-    interval = 1000 #to-do, config, test variance
+    interval = 1000 #to-do, config
     mean_i = 0
-    diff_choices = [i for i in range(0, 30, 1)]
+    max_diff = 30
+    diff_choices = [i for i in range(0, max_diff, 1)]
     diff_mean = diff_choices[mean_i]
-    filtere_diffs = [diff_mean for i in range(interval)]
+    filtere_diffs = [diff_mean for _ in range(interval)]
     diff_i = 0
+    episodes = interval * max_diff - 1
     for episode in range(1, episodes + 1):
-        if episode % interval == 1000:
-            filtere_diffs = get_filtered_diffs(diff_mean, interval)
-            diff_mean = diff_choices[mean_i + 1]
+        if episode % interval == 0:
             mean_i += 1
-        difficulty_level = filtere_diffs[diff_i]
+            diff_mean = diff_choices[mean_i]
+            filtere_diffs = get_filtered_diffs(diff_mean, interval)
+            print('difficulty increases to: ', diff_mean)
+            diff_i = 0
+            
+        difficulty_level = random.sample(diff_choices, k=1)[0]
         diff_i += 1
         train(episode, int(difficulty_level))
         if episode % dev_interval == 0:
@@ -100,9 +112,9 @@ def main():
                 print('Better acc! Saving model!')
                 torch.save(model.state_dict(), config['model']['model_path'])
                 best_episode, best_acc = episode, acc
-            if episode - best_episode >= early_stop:
-                print('Early stop at episode', episode)
-                break
+            # if episode - best_episode >= early_stop:
+            #     print('Early stop at episode', episode)
+            #     break
 
     print('Reload the best model on episode', best_episode, 'with best acc', best_acc.item())
     ckpt = torch.load(config['model']['model_path'])
@@ -111,6 +123,8 @@ def main():
 
 
 if __name__ == "__main__":
+    EXPERIMENT_NAME = '3-16_non_seq_nlp'#to-do
+    logging.basicConfig(filename=EXPERIMENT_NAME + '.txt', level=logging.INFO)
     # config
     config = configparser.ConfigParser()
     config.read("config.ini")

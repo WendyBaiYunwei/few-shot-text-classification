@@ -80,6 +80,8 @@ class OrderedTrainDataLoader:
         if difficulty_level < len(all_nbs):
             queries = all_nbs[difficulty_level] # from similar to different
         else:
+            if len(all_nbs) == 0:
+                return None
             queries = all_nbs[-1]
         front = torch.LongTensor(queries[1:])
         padding = torch.zeros(support_len - len(queries) + 1, dtype=torch.long)
@@ -94,6 +96,8 @@ class OrderedTrainDataLoader:
         # print('neg_data', neg_data, self.support)
         neg_query = self.get_query_by_ss(neg_data[0:self.support], 'neg', difficulty_level, filename)
         pos_query = self.get_query_by_ss(pos_data[0:self.support], 'pos', difficulty_level, filename)
+        if neg_query == None or pos_query == None:
+            return None, None
         query_data = torch.cat([neg_query, pos_query], dim=0)
         data = torch.cat([support_data, query_data], dim=0)
         # combine support target and query target
@@ -115,6 +119,8 @@ class OrderedTrainDataLoader:
         if min(len(neg_data), len(pos_data)) < self.support + self.query: 
             return self.get_batch()
         data, target = self.combine_batch(neg_data, neg_target, pos_data, pos_target, difficulty_level, filename)
+        if data == None:
+            return self.get_batch(difficulty_level)
         return data, target
 
-#to-do: build the contrast loader
+#to-do: change logging and build the contrast loader
