@@ -112,9 +112,6 @@ def main():
                 print('Better acc! Saving model!')
                 torch.save(model.state_dict(), config['model']['model_path'])
                 best_episode, best_acc = episode, acc
-            # if episode - best_episode >= early_stop:
-            #     print('Early stop at episode', episode)
-            #     break
 
     print('Reload the best model on episode', best_episode, 'with best acc', best_acc.item())
     ckpt = torch.load(config['model']['model_path'])
