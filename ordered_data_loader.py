@@ -122,5 +122,3 @@ class OrderedTrainDataLoader:
         if data == None:
             return self.get_batch(difficulty_level)
         return data, target
-
-#to-do: change logging and build the contrast loader

@@ -6,15 +6,15 @@ def getXY(filename):
     Ys = []
     with open(filename) as f:
         lines = f.readlines()
-        for line in lines:
+        for line_i, line in enumerate(lines):
+            if line_i + 1 <= 2019:
+                continue
             tokens = line.split(' ')
             if tokens[0] == 'INFO:root:Dev':
                 episode = int(tokens[2])
-                if episode > 10000:
+                if episode >= 7000:
                     break
                 acc = float(tokens[-1])
-                if len(Ys) and acc < Ys[-1]:
-                    continue
                 Xs.append(episode)
                 Ys.append(acc)
     return Xs, Ys
@@ -53,12 +53,14 @@ newX.append(oldX[-1])
 newY.append(newY[-1])
 # print(newX, newY)
 # exit()
-plt.plot(newX,newY, color='red')
-
-
-plt.plot(oldX,oldY, color='blue')
+plt.title("Validation Accuracy over Episode")
+plt.xlabel("Episode")
+plt.ylabel("Validation Accuracy")
+plt.plot(newX,newY, color='turquoise', marker="x", label='Curriculum Learning')
+plt.plot(oldX,oldY, color='grey', marker="x", label='Without Curriculum Learning')
+plt.legend()
 # plt.title('Training accuracy vs difficulty level')
 # plt.ylabel('training accuracy')
 # plt.xlabel('difficulty level')
-# plt.savefig('./3-16_train_loss')
-plt.show()
+plt.savefig('./3-16_val_acc.png')
+# plt.show()

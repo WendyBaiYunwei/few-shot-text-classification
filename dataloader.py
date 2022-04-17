@@ -75,13 +75,13 @@ class TrainDataLoader:
 
     def get_batch(self):
         filename = self.get_filename()
-        neg_idx = self.get_batch_idx(filename, 'neg') #to-do: check
+        neg_idx = self.get_batch_idx(filename, 'neg')
         pos_idx = self.get_batch_idx(filename, 'pos')
         neg_data, neg_target = self.loaders_ins[filename]['neg'][neg_idx]
         pos_data, pos_target = self.loaders_ins[filename]['pos'][pos_idx]
         self.indices[filename]['neg'] += 1
         self.indices[filename]['pos'] += 1
-        # imcomplete batch
+        # incomplete batch
         if min(len(neg_data), len(pos_data)) < self.support + self.query:
             return self.get_batch()
         data, target = self.combine_batch(neg_data, neg_target, pos_data, pos_target)

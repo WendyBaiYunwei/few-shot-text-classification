@@ -73,21 +73,16 @@ def get_filtered_diffs(mean, interval):
     filtered_diffs = []
 
     while len(filtered_diffs) < interval:
-        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))#to-do
-        # oldMin = np.amin(diffs)
+        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))
         new_diffs = list(filter(lambda x : (x <= mean and x >= 0), diffs))
-        # new_diffs = list(map(lambda x : int((x - oldMin)/(mean - oldMin) * 598), new_diffs))
         filtered_diffs.extend(new_diffs[:interval])
-
-    # filtered_diffs = [mean for i in range(INTERVAL)]
     return filtered_diffs
 
 def main():
     torch.set_printoptions(profile="full")
     best_episode, best_acc = 0, 0.
-    # early_stop = int(config['model']['early_stop']) * dev_interval
     
-    interval = 2000 #to-do, config
+    interval = 2000
     mean_i = 0
     max_diff = 10
     diff_choices = [i for i in range(0, max_diff, 1)]
@@ -120,8 +115,6 @@ def main():
 
 
 if __name__ == "__main__":
-    EXPERIMENT_NAME = '3-16_seq_nlp'#to-do
-    logging.basicConfig(filename=EXPERIMENT_NAME + '.txt', level=logging.INFO)
     # config
     config = configparser.ConfigParser()
     config.read("config.ini")
