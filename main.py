@@ -95,7 +95,7 @@ def main():
             mean_i += 1
             diff_mean = diff_choices[mean_i]
             filtere_diffs = get_filtered_diffs(diff_mean, interval)
-            print('difficulty increases to: ', diff_mean)
+            print('Difficulty increases to: ', diff_mean)
             diff_i = 0
             
         difficulty_level = filtere_diffs[diff_i]

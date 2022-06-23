@@ -224,8 +224,6 @@ def main():
 
     train_data = get_train_data(data_path, train_domains)
     dev_data, test_data = get_test_data(data_path, test_domains)
-    # print(dev_data['books.t2.dev']['neg']['support_data'])
-    # print(dev_data['books.t2.dev']['neg']['support_target'])
 
     vocabulary = get_vocabulary(train_data, min_freq=int(config['data']['min_freq']))
     pad_idx = vocabulary.padding_idx
