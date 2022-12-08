@@ -106,3 +106,5 @@ venv.bak/
 .idea/
 
 Amazon_few_shot/
+events*
+ckpt.pth

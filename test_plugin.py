@@ -64,24 +64,9 @@ def test():
 
 
 def main():
-    best_episode, best_acc = 0, 0.
-    episodes = int(config['model']['episodes'])
-    early_stop = int(config['model']['early_stop']) * dev_interval
-    for episode in range(1, episodes + 1):
-        train(episode)
-        if episode % dev_interval == 0:
-            acc = dev(episode)
-            if acc > best_acc:
-                print('Better acc! Saving model!')
-                torch.save(model.state_dict(), config['model']['model_path'])
-                best_episode, best_acc = episode, acc
-            if episode - best_episode >= early_stop:
-                print('Early stop at episode', episode)
-                break
-
-    print('Reload the best model on episode', best_episode, 'with best acc', best_acc.item())
-    ckpt = torch.load(config['model']['model_path'])
-    model.load_state_dict(ckpt)
+    # train
+    # preprocess dataset, load
+    # fit, predict
     test()
 
 
@@ -114,7 +99,7 @@ if __name__ == "__main__":
     # model & optimizer & criterion
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     support = int(config['model']['support'])
-    model = FewShotInduction(C=int(config['model']['class']),
+    model = RF(C=int(config['model']['class']),
                              S=support,
                              vocab_size=len(vocabulary),
                              embed_size=int(config['model']['embed_dim']),
@@ -123,7 +108,6 @@ if __name__ == "__main__":
                              iterations=int(config['model']['iterations']),
                              outsize=int(config['model']['relation_dim']),
                              weights=weights).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=float(config['model']['lr']))
     criterion = Criterion(way=int(config['model']['class']),
                           shot=int(config['model']['support']))
 
