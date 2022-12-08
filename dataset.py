@@ -4,7 +4,7 @@ from utils import batch_padding
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data_dict, pad_idx):
+    def __init__(self, data_dict, pad_idx=None):
         assert len(data_dict['data']) == len(data_dict['target'])
         self.data = self._padding(data_dict['data'], pad_idx)
         self.target = torch.tensor(data_dict['target'])
@@ -17,4 +17,7 @@ class Dataset(torch.utils.data.Dataset):
         return self.len
 
     def _padding(self, data, pad_idx):
-        return batch_padding(data, pad_idx)
+        if pad_idx == None:
+            return data
+        else:
+            return batch_padding(data, pad_idx)

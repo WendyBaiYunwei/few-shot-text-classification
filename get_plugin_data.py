@@ -5,7 +5,6 @@ import pickle
 random.seed(0)
 
 def get_data(pos_embeddings, neg_embeddings):
-    sample_size = 30
     train_x = []
     train_y = []
     for i in range(len(pos_embeddings)):
