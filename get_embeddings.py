@@ -52,11 +52,6 @@ def _parse_data(data_path, filename):
     print(filename, 'neg', len(neg['data']), 'pos', len(pos['data']))
     return neg, pos
 
-
-def _to_embedding(review):#one review
-    embeddings = model.encode(review)
-    return embeddings
-
 def _process_data(data_dict):
     for i in range(len(data_dict['data'])):
         text = data_dict['data'][i]
@@ -69,7 +64,7 @@ def _process_data(data_dict):
         # split by whitespace
         # text = text.split()
         # replace
-        data_dict['data'][i] = _to_embedding(text)
+        data_dict['data'][i] = model.encode(text)
     return data_dict
 
 
@@ -111,7 +106,6 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-    kwargs = {'num_workers': 4, 'pin_memory': True} if torch.cuda.is_available() else {}
     data_path = config['data']['path']
 
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')

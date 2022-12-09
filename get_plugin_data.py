@@ -10,7 +10,6 @@ def get_data(pos_embeddings, neg_embeddings):
     for i in range(len(pos_embeddings)):
         pos = pos_embeddings[i]['data']
         neg = neg_embeddings[i]['data']
-
         both = [pos, neg]
         # get same class embs
         for i, cur in enumerate(both):
@@ -35,7 +34,6 @@ with open('../data/embedding_nlp_pos.pkl', 'rb') as f:
 
 with open('../data/embedding_nlp_neg.pkl', 'rb') as f:
     neg_embeddings = pickle.load(f)
-
 
 trainX, trainY = get_data(pos_embeddings, neg_embeddings)
 

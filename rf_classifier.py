@@ -4,8 +4,9 @@ import numpy as np
 import torch.nn.functional as F
 import pickle
 import json
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.svm import SVR
+from sklearn.metrics import accuracy_score
 
 class RFClassifier():
     def __init__(self):
@@ -16,17 +17,24 @@ class RFClassifier():
 
         with open(data_dir + 'rf_train_y_nlp.pkl', 'rb') as f:
             trainY = pickle.load(f)
-
+        
+        split = int(len(trainX) * 0.8)
+        train_x = trainX[:split]
+        train_y = trainY[:split]
+        test_x = trainX[split:]
+        test_y = trainY[split:]
         self.shot = 5
         self.way = 2
 
         print(trainX.shape, trainY.shape)
         print('start RF training')
-        self.classifier = RandomForestRegressor(n_estimators = 200, random_state = 0, max_features = 4)
+        self.classifier = RandomForestClassifier(n_estimators = 200, random_state = 0, max_features = 4)
         # self.classifier = SVR(max_iter = 100)
-        self.classifier.fit(trainX, trainY)
+        self.classifier.fit(train_x, train_y)
         # self.classifier.fit(trainX, trainY, weights)
         print('done RF training')
+        preds = self.classifier.predict(test_x)
+        print(accuracy_score(test_y, preds))
         # preds = self.classifier.predict(testX)
         # print(accuracy_score(preds, testY))
         del trainX
