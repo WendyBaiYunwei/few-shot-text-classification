@@ -73,7 +73,7 @@ def get_filtered_diffs(mean, interval):
     filtered_diffs = []
 
     while len(filtered_diffs) < interval:
-        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))
+        diffs = np.random.normal(loc=mean, scale=3.5, size=int(interval * 3))#to-do
         new_diffs = list(filter(lambda x : (x <= mean and x >= 0), diffs))
         filtered_diffs.extend(new_diffs[:interval])
     return filtered_diffs
@@ -81,11 +81,12 @@ def get_filtered_diffs(mean, interval):
 def main():
     torch.set_printoptions(profile="full")
     best_episode, best_acc = 0, 0.
+    # early_stop = int(config['model']['early_stop']) * dev_interval
     
-    interval = 2000
+    interval = 2000 #to-do, config
     mean_i = 0
     max_diff = 10
-    diff_choices = [i for i in range(0, max_diff, 1)]
+    diff_choices = [i for i in range(0, 30, 1)] # choose uniformly at random
     diff_mean = diff_choices[mean_i]
     filtere_diffs = [diff_mean for _ in range(interval)]
     diff_i = 0
@@ -95,10 +96,10 @@ def main():
             mean_i += 1
             diff_mean = diff_choices[mean_i]
             filtere_diffs = get_filtered_diffs(diff_mean, interval)
-            print('Difficulty increases to: ', diff_mean)
+            print('difficulty increases to: ', diff_mean)
             diff_i = 0
             
-        difficulty_level = filtere_diffs[diff_i]
+        difficulty_level = random.sample(diff_choices, k=1)[0]
         diff_i += 1
         train(episode, int(difficulty_level))
         if episode % dev_interval == 0:
